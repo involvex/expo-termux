@@ -1,6 +1,8 @@
 {
   "platforms": ["android"],
   "android": {
+    "package": "com.involvex.expotermux",
     "modules": ["com.involvex.expotermux.ExpoTermuxModule"]
-  }
+  },
+  "plugin": "./plugin/build/index.js"
 }

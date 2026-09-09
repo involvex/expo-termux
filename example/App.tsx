@@ -1,28 +1,61 @@
-import { Button, SafeAreaView, ScrollView, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import TermuxButton from '../src/TermuxButton';
 
 export default function App() {
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.container}>
-        <Text style={styles.header}>Module API Example</Text>
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={styles.header}>Expo Termux Demo</Text>
+        <Text style={styles.subtitle}>
+          Dispatch a test command to Termux via the native RunCommandService intent.
+        </Text>
+        <TermuxButton />
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Test command</Text>
+          <Text style={styles.command}>/data/data/com.termux/files/usr/bin/bash -c "ls -la"</Text>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function Group(props: { name: string; children: React.ReactNode }) {
-  return (
-    <View style={styles.group}>
-      <Text style={styles.groupHeader}>{props.name}</Text>
-      {props.children}
-    </View>
-  );
-}
-
-const styles = {
-  header: { fontSize: 30, margin: 20 },
-  groupHeader: { fontSize: 20, marginBottom: 20 },
-  group: { margin: 20, backgroundColor: '#fff', borderRadius: 10, padding: 20 },
-  container: { flex: 1, backgroundColor: '#eee' },
-  view: { flex: 1, height: 200 },
-};
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#121212',
+  },
+  content: {
+    padding: 16,
+  },
+  header: {
+    color: '#FFFFFF',
+    fontSize: 28,
+    fontWeight: '700',
+    marginTop: 16,
+    marginHorizontal: 16,
+  },
+  subtitle: {
+    color: '#B0B0B0',
+    fontSize: 14,
+    marginTop: 8,
+    marginHorizontal: 16,
+  },
+  card: {
+    backgroundColor: '#1E1E1E',
+    borderRadius: 12,
+    padding: 20,
+    margin: 16,
+  },
+  cardTitle: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  command: {
+    color: '#B0B0B0',
+    fontSize: 13,
+    fontFamily: 'monospace',
+  },
+});

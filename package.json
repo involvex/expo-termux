@@ -1,20 +1,27 @@
 {
-  "name": "expo-termux",
+  "name": "@involvex/expo-termux",
   "version": "0.1.0",
   "description": "Expo module for Termux integration",
   "main": "build/index.js",
   "types": "build/index.d.ts",
+  "files": [
+    "build",
+    "android",
+    "plugin/build"
+  ],
   "scripts": {
-    "build": "node internal/module_scripts/build.js",
-    "clean": "node internal/module_scripts/clean.js",
-    "lint": "eslint src/",
-    "lint:fix": "eslint src/ --fix",
-    "test": "node internal/module_scripts/test.js",
+    "build": "node internal/module_scripts/prepare.js",
+    "build:plugin": "tsc --build plugin",
+    "clean": "node internal/module_scripts/clean.js && node internal/module_scripts/clean.js plugin",
+    "prepublishOnly": "bun run build",
+    "lint": "eslint src/ plugin/src/",
+    "lint:fix": "eslint src/ plugin/src/ --fix",
+    "test": "bun x jest",
     "prepare": "node internal/module_scripts/prepare.js",
-    "open:ios": "node internal/module_scripts/open-ios.js",
     "open:android": "node internal/module_scripts/open-android.js",
     "format": "prettier . --write",
     "typecheck": "tsc --noEmit",
+    "typecheck:plugin": "tsc --noEmit -p plugin/tsconfig.json",
     "prebuild": "bun run format && bun run lint:fix && bun run typecheck"
   },
   "keywords": [
@@ -33,6 +40,7 @@
   "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.26.0",
+    "@expo/config-plugins": "~57.0.9",
     "@types/jest": "^29.2.1",
     "@types/react": "~19.2.4",
     "babel-preset-expo": "~57.0.0",
