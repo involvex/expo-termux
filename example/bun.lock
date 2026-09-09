@@ -6,6 +6,7 @@
       "name": "expo-termux-example",
       "dependencies": {
         "expo": "~57.0.21",
+        "expo-file-system": "^57.0.6",
         "react": "19.2.3",
         "react-native": "0.86.3",
         "react-native-safe-area-context": "^5.9.1",

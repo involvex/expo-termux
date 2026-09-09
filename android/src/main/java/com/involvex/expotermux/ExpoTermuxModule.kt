@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
+import java.io.File
 
 class ExpoTermuxModule : Module() {
   override fun definition() = ModuleDefinition {
@@ -15,6 +16,10 @@ class ExpoTermuxModule : Module() {
 
     Function("executeCommand") { commandPath: String, args: List<String>, workingDir: String?, inBackground: Boolean ->
       dispatchTermuxIntent(commandPath, args, workingDir, inBackground)
+    }
+
+    Function("readFile") { path: String ->
+      readFile(path)
     }
   }
 
@@ -50,6 +55,20 @@ class ExpoTermuxModule : Module() {
     } catch (e: Exception) {
       Log.e(TAG, "Failed to dispatch Termux intent.", e)
       false
+    }
+  }
+
+  private fun readFile(path: String): String {
+    return try {
+      val file = File(path)
+      if (!file.exists()) {
+        Log.w(TAG, "File does not exist: $path")
+        return ""
+      }
+      file.readText(Charsets.UTF_8)
+    } catch (e: Exception) {
+      Log.e(TAG, "Failed to read file: $path", e)
+      ""
     }
   }
 

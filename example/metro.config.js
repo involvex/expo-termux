@@ -20,7 +20,7 @@ config.resolver.nodeModulesPaths = [
 ];
 
 config.resolver.extraNodeModules = {
-  'expo-termux': '..',
+  'expo-termux': path.resolve(__dirname, '../src'),
 };
 
 config.watchFolders = [path.resolve(__dirname, '..')];

@@ -7,6 +7,8 @@ declare class ExpoTermuxModule extends NativeModule {
     workingDir: string | null,
     inBackground: boolean
   ): boolean;
+
+  readFile(path: string): string;
 }
 
 export default requireNativeModule<ExpoTermuxModule>('ExpoTermux');

@@ -1,20 +1,27 @@
 import { withAndroidManifest, type ConfigPlugin } from '@expo/config-plugins';
 
 const RUN_COMMAND_PERMISSION = 'com.termux.permission.RUN_COMMAND';
+const MANAGE_STORAGE_PERMISSION = 'android.permission.MANAGE_EXTERNAL_STORAGE';
 
 const withTermuxRunCommand: ConfigPlugin = (config) => {
   return withAndroidManifest(config, (config) => {
     const manifest = config.modResults.manifest;
     manifest['uses-permission'] = manifest['uses-permission'] ?? [];
 
-    const alreadyPresent = manifest['uses-permission'].some(
-      (entry) => entry.$?.['android:name'] === RUN_COMMAND_PERMISSION
+    const permissionsToAdd = [RUN_COMMAND_PERMISSION, MANAGE_STORAGE_PERMISSION];
+
+    const existing = new Set(
+      manifest['uses-permission']
+        .map((entry) => entry.$?.['android:name'])
+        .filter((name): name is string => typeof name === 'string')
     );
 
-    if (!alreadyPresent) {
-      manifest['uses-permission'].push({
-        $: { 'android:name': RUN_COMMAND_PERMISSION },
-      });
+    for (const permission of permissionsToAdd) {
+      if (!existing.has(permission)) {
+        manifest['uses-permission'].push({
+          $: { 'android:name': permission },
+        });
+      }
     }
 
     manifest['queries'] = manifest['queries'] ?? [];

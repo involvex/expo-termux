@@ -29,11 +29,14 @@ async function runManifestModifier(manifest: Manifest): Promise<Manifest> {
 }
 
 describe('withTermuxRunCommand', () => {
-  it('adds RUN_COMMAND permission to an empty manifest', async () => {
+  it('adds RUN_COMMAND and MANAGE_EXTERNAL_STORAGE permissions to an empty manifest', async () => {
     const manifest = await runManifestModifier({});
     const permissions = manifest['uses-permission'] as { $: { 'android:name': string } }[];
 
-    expect(permissions).toEqual([{ $: { 'android:name': 'com.termux.permission.RUN_COMMAND' } }]);
+    expect(permissions).toEqual([
+      { $: { 'android:name': 'com.termux.permission.RUN_COMMAND' } },
+      { $: { 'android:name': 'android.permission.MANAGE_EXTERNAL_STORAGE' } },
+    ]);
   });
 
   it('adds Termux package queries to an empty manifest', async () => {
@@ -55,12 +58,12 @@ describe('withTermuxRunCommand', () => {
       package: { $: { 'android:name': string } }[];
     }[];
 
-    expect(permissions).toHaveLength(1);
+    expect(permissions).toHaveLength(2);
     expect(queries).toHaveLength(1);
     expect(queries[0].package).toHaveLength(1);
   });
 
-  it('preserves existing permissions and appends the Termux permission if missing', async () => {
+  it('preserves existing permissions and appends missing ones', async () => {
     const existing = {
       'uses-permission': [{ $: { 'android:name': 'android.permission.INTERNET' } }],
     };
@@ -71,17 +74,21 @@ describe('withTermuxRunCommand', () => {
     expect(permissions).toEqual([
       { $: { 'android:name': 'android.permission.INTERNET' } },
       { $: { 'android:name': 'com.termux.permission.RUN_COMMAND' } },
+      { $: { 'android:name': 'android.permission.MANAGE_EXTERNAL_STORAGE' } },
     ]);
   });
 
-  it('does not duplicate an existing Termux permission', async () => {
+  it('does not duplicate existing permissions', async () => {
     const existing = {
-      'uses-permission': [{ $: { 'android:name': 'com.termux.permission.RUN_COMMAND' } }],
+      'uses-permission': [
+        { $: { 'android:name': 'com.termux.permission.RUN_COMMAND' } },
+        { $: { 'android:name': 'android.permission.MANAGE_EXTERNAL_STORAGE' } },
+      ],
     };
 
     const manifest = await runManifestModifier(existing);
     const permissions = manifest['uses-permission'] as { $: { 'android:name': string } }[];
 
-    expect(permissions).toHaveLength(1);
+    expect(permissions).toHaveLength(2);
   });
 });
