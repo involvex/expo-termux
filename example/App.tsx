@@ -29,6 +29,7 @@ export default function App() {
   const [input, setInput] = useState('');
   const [history, setHistory] = useState<CommandEntry[]>([]);
   const scrollViewRef = useRef<ScrollView>(null);
+  const settingsOpenedRef = useRef(false);
 
   const appendOutput = (id: string, output: string) => {
     setHistory((prev) => prev.map((entry) => (entry.id === id ? { ...entry, output } : entry)));
@@ -40,9 +41,11 @@ export default function App() {
     }
 
     const apiLevel = Number(Platform.Version);
-    if (apiLevel < 30) {
-      return true;
+    if (apiLevel < 30 || settingsOpenedRef.current) {
+      return false;
     }
+
+    settingsOpenedRef.current = true;
 
     return new Promise((resolve) => {
       Alert.alert(
@@ -70,28 +73,36 @@ export default function App() {
   };
 
   const ensureOutputDir = async (): Promise<string | null> => {
-    const dirInfo = await FileSystem.getInfoAsync(OUTPUT_DIR);
-    if (!dirInfo.exists) {
-      try {
+    try {
+      const dirInfo = await FileSystem.getInfoAsync(OUTPUT_DIR);
+      if (!dirInfo.exists) {
         await FileSystem.makeDirectoryAsync(OUTPUT_DIR, { intermediates: true });
-      } catch {
-        const opened = await showAllFilesAccessPrompt();
-        if (!opened) {
-          return null;
-        }
+      }
+      return OUTPUT_DIR;
+    } catch {
+      const opened = await showAllFilesAccessPrompt();
+      if (!opened) {
+        Alert.alert(
+          'Storage unavailable',
+          'Cannot access output directory. Ensure All files access is granted.'
+        );
+        return null;
+      }
 
-        try {
+      try {
+        const dirInfo = await FileSystem.getInfoAsync(OUTPUT_DIR);
+        if (!dirInfo.exists) {
           await FileSystem.makeDirectoryAsync(OUTPUT_DIR, { intermediates: true });
-        } catch {
-          Alert.alert(
-            'Storage unavailable',
-            'Cannot create output directory. Ensure All files access is granted.'
-          );
-          return null;
         }
+        return OUTPUT_DIR;
+      } catch {
+        Alert.alert(
+          'Storage unavailable',
+          'Cannot access output directory after granting permission. Try restarting the app.'
+        );
+        return null;
       }
     }
-    return OUTPUT_DIR;
   };
 
   const runCommand = async () => {
