@@ -34,7 +34,7 @@ export default function App() {
     setHistory((prev) => prev.map((entry) => (entry.id === id ? { ...entry, output } : entry)));
   };
 
-  const openAllFilesSettings = async (): Promise<boolean> => {
+  const showAllFilesAccessPrompt = async (): Promise<boolean> => {
     if (Platform.OS !== 'android') {
       return true;
     }
@@ -44,49 +44,51 @@ export default function App() {
       return true;
     }
 
-    Alert.alert(
-      'All files access required',
-      'This app needs permission to read/write shared storage for command output. Tap OK to open Settings, then enable "All files access" for this app.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Open Settings',
-          onPress: async () => {
-            try {
-              await Linking.openSettings();
-            } catch {
-              Alert.alert(
-                'Unable to open settings',
-                'Please open Settings manually and enable "All files access" for this app.'
-              );
-            }
+    return new Promise((resolve) => {
+      Alert.alert(
+        'All files access required',
+        'This app needs "All files access" to read command output from shared storage.\n\nTap OK to open Settings, then:\n1. Find this app in the list\n2. Tap "All files access" or "Files and media"\n3. Set it to "Allow"\n\nNote: This is a special Android permission — it will NOT show a popup dialog.',
+        [
+          { text: 'Cancel', style: 'cancel', onPress: () => resolve(false) },
+          {
+            text: 'Open Settings',
+            onPress: async () => {
+              try {
+                await Linking.openSettings();
+              } catch {
+                Alert.alert(
+                  'Unable to open settings',
+                  'Please open Settings > Apps > Expo Termux Example > Permissions > All files access manually.'
+                );
+              }
+              resolve(true);
+            },
           },
-        },
-      ]
-    );
-
-    return false;
+        ]
+      );
+    });
   };
 
   const ensureOutputDir = async (): Promise<string | null> => {
-    const apiLevel = Number(Platform.Version);
-    if (apiLevel >= 30) {
-      const hasPermission = await openAllFilesSettings();
-      if (!hasPermission) {
-        return null;
-      }
-    }
-
     const dirInfo = await FileSystem.getInfoAsync(OUTPUT_DIR);
     if (!dirInfo.exists) {
       try {
         await FileSystem.makeDirectoryAsync(OUTPUT_DIR, { intermediates: true });
       } catch {
-        Alert.alert(
-          'Storage unavailable',
-          'Cannot create output directory. Ensure All files access is granted.'
-        );
-        return null;
+        const opened = await showAllFilesAccessPrompt();
+        if (!opened) {
+          return null;
+        }
+
+        try {
+          await FileSystem.makeDirectoryAsync(OUTPUT_DIR, { intermediates: true });
+        } catch {
+          Alert.alert(
+            'Storage unavailable',
+            'Cannot create output directory. Ensure All files access is granted.'
+          );
+          return null;
+        }
       }
     }
     return OUTPUT_DIR;
